@@ -8,7 +8,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var OriginalJson = `{
+var OriginalJSON = `{
   "Structure": {
     "CodeLists": {
       "CodeList": [
@@ -150,16 +150,16 @@ var OriginalJson = `{
 func TestMarshalAndUnmarshal(t *testing.T) {
 	Convey("When json is unmarshaled", t, func() {
 		var data *StructuralData
-		err := json.Unmarshal([]byte(OriginalJson), &data)
+		err := json.Unmarshal([]byte(OriginalJSON), &data)
 
 		So(err, ShouldBeNil)
 
 		Convey("When json is marshaled again", func() {
-			newJson, err := json.MarshalIndent(&data, "", "  ")
-			newJson = bytes.Replace(newJson, []byte("\\u0026"), []byte("&"), -1)
+			newJSON, err := json.MarshalIndent(&data, "", "  ")
+			newJSON = bytes.Replace(newJSON, []byte("\\u0026"), []byte("&"), -1)
 
 			So(err, ShouldBeNil)
-			So(string(newJson), ShouldEqual, OriginalJson)
+			So(string(newJSON), ShouldEqual, OriginalJSON)
 		})
 	})
 }

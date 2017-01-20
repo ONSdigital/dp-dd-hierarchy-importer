@@ -3,36 +3,36 @@ package sql
 import (
 	"fmt"
 	"io"
-	"strings"
 	"sort"
+	"strings"
 )
 
 const (
-	hierarchySql = "insert into hierarchy (hierarchy_id, hierarchy_name) values (%s, %s);\n"
-	areaSql = "insert into hierarchy_area_type (id, name, level) select %s, %s, %d where not exists (select id from hierarchy_area_type where id=%[1]s);\n"
-	entrySql     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, area_type) values (%s, %s, %s, %s, %s);\n"
+	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name) values (%s, %s);\n"
+	areaSQL      = "insert into hierarchy_area_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
+	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, area_type) values (%s, %s, %s, %s, %s);\n"
 )
 
-
-// write sql to the given writer.
+// WriteSQL writes sql insert statements to the given writer to create the given hierarchy in a db.
 // Please note that there is no error handling of failed writes
 // This is a stand-alone command line tool, so errors can just be reported to the user
-func WriteSql(writer io.Writer, hierarchy *Hierarchy) {
+func WriteSQL(writer io.Writer, hierarchy *Hierarchy) {
 
-	if len(hierarchy.Id) == 0 {
+	if len(hierarchy.ID) == 0 {
 		panic("Cannot write sql for a hierarchy without an id!")
 	}
-	io.WriteString(writer, fmt.Sprintf(hierarchySql, quote(hierarchy.Id), quote(hierarchy.Names["en"])))
+	io.WriteString(writer, fmt.Sprintf(hierarchySQL, quote(hierarchy.ID), quote(hierarchy.Names["en"])))
 
 	io.WriteString(writer, "\n")
 	writeAreaTypes(writer, hierarchy.AreaTypes)
 
 	io.WriteString(writer, "\n")
-	writeEntries(writer, hierarchy.Entries, hierarchy.Id)
+	writeEntries(writer, hierarchy.Entries, hierarchy.ID)
 
 }
 
-func ShouldWriteSql(hierarchy *Hierarchy) bool {
+// ShouldWriteSQL returns true if the hierarchy has sufficient depth (at least one entry has grandchildren)
+func ShouldWriteSQL(hierarchy *Hierarchy) bool {
 	for _, entry := range hierarchy.Entries {
 		if countLevel(entry, hierarchy.Entries) > 1 {
 			return true
@@ -51,7 +51,6 @@ func countLevel(entry Entry, entries map[string]Entry) int {
 	return -1
 }
 
-
 func writeAreaTypes(writer io.Writer, areas map[string]LevelType) {
 	keys := make([]string, len(areas))
 	i := 0
@@ -62,11 +61,11 @@ func writeAreaTypes(writer io.Writer, areas map[string]LevelType) {
 	sort.Strings(keys)
 	for _, key := range keys {
 		area := areas[key]
-		io.WriteString(writer, fmt.Sprintf(areaSql, quote(area.Id), quote(area.Name), area.Level))
+		io.WriteString(writer, fmt.Sprintf(areaSQL, quote(area.ID), quote(area.Name), area.Level))
 	}
 }
 
-func writeEntries(writer io.Writer, entries map[string]Entry, hierarchyId string) {
+func writeEntries(writer io.Writer, entries map[string]Entry, hierarchyID string) {
 	keys := make([]string, len(entries))
 	i := 0
 	for k := range entries {
@@ -78,23 +77,23 @@ func writeEntries(writer io.Writer, entries map[string]Entry, hierarchyId string
 	written := make(map[string]bool)
 	for _, key := range keys {
 		entry := entries[key]
-		writeEntry(writer, &entry, hierarchyId, entries, written)
+		writeEntry(writer, &entry, hierarchyID, entries, written)
 	}
 }
 
-func writeEntry(writer io.Writer, entry *Entry, hierarchyId string, entries map[string]Entry, written map[string]bool) {
+func writeEntry(writer io.Writer, entry *Entry, hierarchyID string, entries map[string]Entry, written map[string]bool) {
 	if written[entry.Code] == true {
 		return
 	}
 	if len(entry.ParentCode) > 0 {
 		if parent, ok := entries[entry.ParentCode]; ok {
-			writeEntry(writer, &parent, hierarchyId, entries, written)
+			writeEntry(writer, &parent, hierarchyID, entries, written)
 		} else {
 			fmt.Printf("!! Entry '%s' has an unknown parent '%s' - commenting out the insert\n", entry.Code, entry.ParentCode)
 			io.WriteString(writer, "--")
 		}
 	}
-	io.WriteString(writer, fmt.Sprintf(entrySql, quote(hierarchyId), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType)))
+	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(hierarchyID), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType)))
 	written[entry.Code] = true
 }
 

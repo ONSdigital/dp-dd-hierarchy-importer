@@ -48,11 +48,12 @@ This is the primary type of hierarchy.
 - Social: http://web.ons.gov.uk/ons/api/data/classifications.xml?apikey=API_KEY&context=Social
 
 Classifications can be hierarchical, having a parent, order, IsTotal and SubTotal flags. 
-Some classification hierarchies can be flat, and we will only import classifications with a deep tree (such as COICOP: http://web.ons.gov.uk/ons/api/data/classification/CL_0000641.xml?apikey=API_KEY&context=Economic).
+Some classifications can be flat lists, and we will only import classifications with a deep tree (such as COICOP: http://web.ons.gov.uk/ons/api/data/classification/CL_0000641.xml?apikey=API_KEY&context=Economic).
 
-One possible (flat) classification is time: http://web.ons.gov.uk/ons/api/data/classification/CL_0000635.xml?apikey=API_KEY&context=Economic
+One possible (flat) classification list is time: http://web.ons.gov.uk/ons/api/data/classification/CL_0000635.xml?apikey=API_KEY&context=Economic
 
 There can be multiple classifications in a single json file, with the same id and overlapping entries.
+
 ## Concepts
  are refined by Context
 - Census:  http://web.ons.gov.uk/ons/api/data/concepts.xml?apikey=API_KEY&context=Census&find=&concept=

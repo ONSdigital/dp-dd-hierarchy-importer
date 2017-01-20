@@ -12,7 +12,7 @@ import (
 )
 
 var sampleHierarchy = Hierarchy{
-	Id:    "myHierarchyId",
+	ID:    "myHierarchyId",
 	Names: map[string]string{"en": "my hierarchy name"},
 	Entries: map[string]Entry{
 		"c":      {Code: "c", AreaType: "C", ParentCode: "b", Names: map[string]string{"en": "level c name", "cy": "welsh name"}},
@@ -21,18 +21,18 @@ var sampleHierarchy = Hierarchy{
 		"orphan": {Code: "orphan", AreaType: "C", ParentCode: "x", Names: map[string]string{"en": "orphan 'name'", "cy": "welsh name"}},
 	},
 	AreaTypes: map[string]LevelType{
-		"A": {Id: "A", Level: 1, Name: "Level 1 -A"},
-		"B": {Id: "B", Level: 2, Name: "Level 2 -B"},
-		"C": {Id: "C", Level: 3, Name: "Level 3 -C"},
+		"A": {ID: "A", Level: 1, Name: "Level 1 -A"},
+		"B": {ID: "B", Level: 2, Name: "Level 2 -B"},
+		"C": {ID: "C", Level: 3, Name: "Level 3 -C"},
 	},
 }
 
 func TestWriteInserts(t *testing.T) {
 
-	Convey("When WriteSql is invoked with a hierarchy", t, func() {
+	Convey("When WriteSQL is invoked with a hierarchy", t, func() {
 		var buffer bytes.Buffer
 		writer := bufio.NewWriter(&buffer)
-		WriteSql(writer, &sampleHierarchy)
+		WriteSQL(writer, &sampleHierarchy)
 		writer.Flush()
 		var lines []string
 		scanner := bufio.NewScanner(bufio.NewReader(&buffer))
@@ -92,7 +92,7 @@ func TestWriteInserts(t *testing.T) {
 }
 
 var flat = Hierarchy{
-	Id:    "flat",
+	ID:    "flat",
 	Names: map[string]string{"en": "my hierarchy name"},
 	Entries: map[string]Entry{
 		"c": {Code: "c", ParentCode: "a", Names: map[string]string{"en": "level c name", "cy": "welsh name"}},
@@ -102,13 +102,13 @@ var flat = Hierarchy{
 	AreaTypes: map[string]LevelType{},
 }
 
-func TestShouldWriteSql(t *testing.T) {
+func TestShouldWriteSQL(t *testing.T) {
 
-	if ShouldWriteSql(&flat) {
-		t.Errorf("Should not write sql when hierarchy is flat, but got true from call to ShouldWriteSql")
+	if ShouldWriteSQL(&flat) {
+		t.Errorf("Should not write sql when hierarchy is flat, but got true from call to ShouldWriteSQL")
 	}
 
-	if !ShouldWriteSql(&sampleHierarchy) {
-		t.Errorf("Should write sql when hierarchy is not flat, but got false from call to ShouldWriteSql")
+	if !ShouldWriteSQL(&sampleHierarchy) {
+		t.Errorf("Should write sql when hierarchy is not flat, but got false from call to ShouldWriteSQL")
 	}
 }

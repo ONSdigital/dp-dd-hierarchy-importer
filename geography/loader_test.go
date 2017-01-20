@@ -12,16 +12,16 @@ import (
 func TestReadDataToHierarchy(t *testing.T) {
 
 	Convey("Given a reader containing json", t, func() {
-		readcloser := ioutil.NopCloser(strings.NewReader(OriginalJson))
+		readcloser := ioutil.NopCloser(strings.NewReader(OriginalJSON))
 
 		originalData := GeographicData{}
-		json.Unmarshal([]byte(OriginalJson), &originalData)
+		json.Unmarshal([]byte(OriginalJSON), &originalData)
 
 		Convey("When read into a hierarchy", func() {
 			hierarchy := readHierarchy(readcloser)
 
 			So(hierarchy, ShouldNotBeNil)
-			So(hierarchy.Id, ShouldEqual, "2011STATH")
+			So(hierarchy.ID, ShouldEqual, "2011STATH")
 			So(hierarchy.Names["en"], ShouldEqual, "2011 Statistical Geography Hierarchy")
 			So(hierarchy.Names["cy"], ShouldEqual, "Hierarchaeth Daearyddiaeth Ystadegol 2011")
 			So(len(hierarchy.Entries), ShouldEqual, 5)
@@ -34,7 +34,7 @@ func TestReadDataToHierarchy(t *testing.T) {
 				So(entry.AreaType, ShouldEqual, item.AreaType.Abbreviation)
 				areaType := hierarchy.AreaTypes[entry.AreaType]
 				So(areaType, ShouldNotBeNil)
-				So(areaType.Id, ShouldEqual, item.AreaType.Abbreviation)
+				So(areaType.ID, ShouldEqual, item.AreaType.Abbreviation)
 				So(areaType.Name, ShouldEqual, item.AreaType.Codename)
 				So(areaType.Level, ShouldEqual, int(item.AreaType.Level))
 				for _, label := range item.Labels.Label {

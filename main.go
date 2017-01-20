@@ -28,8 +28,11 @@ func main() {
 
 	hierarchies := loadHierarchies(*hierarchyType, flag.Arg(0))
 
+	if len(hierarchies) == 0 {
+		fmt.Println("No hierarchies found! Nothing to do")
+	}
 	for _, h := range hierarchies {
-		writeSqlForHierarchy(dir, h)
+		writeSQLForHierarchy(dir, h)
 	}
 
 }
@@ -42,7 +45,7 @@ func checkCommandLineArgs() {
 		fmt.Println("Please specify a type argument of 'g' (geographical hierarchy) or 's' (structural hierarchy/classification), and the location of the file to parse, e.g.")
 		fmt.Println(exe + " -type=g 'http://web.ons.gov.uk/ons/api/data/hierarchies/hierarchy/2011WKWZH.json?apikey=XXXXX&levels=0,1,2'")
 		fmt.Println("or")
-		fmt.Println(exe + " -type=s 'http://web.ons.gov.uk/ons/api/data/classification/CL_0001363.json?apikey=XXXXX&context=Census'")
+		fmt.Println(exe + " -type=s 'http://web.ons.gov.uk/ons/api/data/classification/CL_0000641.json?apikey=XXXXX&context=Economic'")
 		fmt.Println("or")
 		fmt.Println(exe + " -type=g /tmp/localfile.json")
 		os.Exit(0)
@@ -60,19 +63,19 @@ func loadHierarchies(t string, file string) []*sql.Hierarchy {
 	return hierarchies
 }
 
-func writeSqlForHierarchy(dir string, h *sql.Hierarchy) {
-	if (!sql.ShouldWriteSql(h)) {
-		fmt.Printf("Hierarchy %s is flat - not writing sql\n", h.Id)
+func writeSQLForHierarchy(dir string, h *sql.Hierarchy) {
+	if !sql.ShouldWriteSQL(h) {
+		fmt.Printf("Hierarchy %s is flat - not writing sql\n", h.ID)
 		return
 	}
-	filename := filepath.Join(dir, h.Id+".sql")
+	filename := filepath.Join(dir, h.ID+".sql")
 	fmt.Printf("Creating sql file %s\n", filename)
 	file, err := os.Create(filename)
 	defer file.Close()
 	if err != nil {
 		log.Fatal("Cannot create file", err)
 	}
-	sql.WriteSql(file, h)
+	sql.WriteSQL(file, h)
 	fmt.Printf("Finished writing %s with %d entries\n", filename, len(h.Entries))
 }
 

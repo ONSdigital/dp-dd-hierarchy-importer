@@ -10,8 +10,9 @@ import (
 	"strings"
 )
 
+// OpenReader opens a reader on a local file or a url, as appropriate
 func OpenReader(endpoint string) io.ReadCloser {
-	if isUrl(endpoint) {
+	if isURL(endpoint) {
 		response, err := http.Get(endpoint)
 		if err != nil {
 			fmt.Println("Error calling endpoint!")
@@ -29,6 +30,7 @@ func OpenReader(endpoint string) io.ReadCloser {
 
 }
 
+// Parse parses the content from the Reader into the data object
 func Parse(reader io.ReadCloser, data interface{}) {
 	defer reader.Close()
 
@@ -47,6 +49,6 @@ func Parse(reader io.ReadCloser, data interface{}) {
 
 }
 
-func isUrl(file string) bool {
+func isURL(file string) bool {
 	return strings.HasPrefix(file, "http")
 }

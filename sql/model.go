@@ -1,12 +1,14 @@
 package sql
 
+// Hierarchy represents a complete hierarchy
 type Hierarchy struct {
-	Id      string
-	Names   map[string]string
-	Entries map[string]Entry
+	ID        string
+	Names     map[string]string
+	Entries   map[string]Entry
 	AreaTypes map[string]LevelType
 }
 
+// NewHierarchy returns a properly initialised Hierarchy
 func NewHierarchy() Hierarchy {
 	hierarchy := Hierarchy{}
 	hierarchy.Entries = make(map[string]Entry)
@@ -15,19 +17,22 @@ func NewHierarchy() Hierarchy {
 	return hierarchy
 }
 
+// LevelType is reference data for a type such as an Area - country, region etc
 type LevelType struct {
-	Id string
-	Name string
+	ID    string
+	Name  string
 	Level int
 }
 
+// Entry is a single entry in a hierarchy
 type Entry struct {
-	Code         string
-	ParentCode   string
-	AreaType string
-	Names        map[string]string
+	Code       string
+	ParentCode string
+	AreaType   string
+	Names      map[string]string
 }
 
+// NewEntry returns a properly initialised Entry
 func NewEntry() Entry {
 	entry := Entry{}
 	entry.Names = make(map[string]string)
