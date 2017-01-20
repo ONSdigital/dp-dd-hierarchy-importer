@@ -61,6 +61,10 @@ func loadHierarchies(t string, file string) []*sql.Hierarchy {
 }
 
 func writeSqlForHierarchy(dir string, h *sql.Hierarchy) {
+	if (!sql.ShouldWriteSql(h)) {
+		fmt.Printf("Hierarchy %s is flat - not writing sql\n", h.Id)
+		return
+	}
 	filename := filepath.Join(dir, h.Id+".sql")
 	fmt.Printf("Creating sql file %s\n", filename)
 	file, err := os.Create(filename)
@@ -68,7 +72,7 @@ func writeSqlForHierarchy(dir string, h *sql.Hierarchy) {
 	if err != nil {
 		log.Fatal("Cannot create file", err)
 	}
-	sql.WriteInserts(file, h)
+	sql.WriteSql(file, h)
 	fmt.Printf("Finished writing %s with %d entries\n", filename, len(h.Entries))
 }
 

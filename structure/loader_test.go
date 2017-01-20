@@ -43,12 +43,27 @@ func TestReadDataToHierarchy(t *testing.T) {
 					So(entry, ShouldNotBeNil)
 					So(entry.Code, ShouldEqual, item.Value)
 					So(entry.ParentCode, ShouldEqual, item.Parent)
-					So(entry.Codename, ShouldEqual, item.Description.Name)
-					So(len(entry.Abbreviation), ShouldEqual, 0)
-					So(entry.Level, ShouldEqual, 0)
+					So(entry.AreaType, ShouldEqual, "")
 					So(entry.Names[item.Description.Lang], ShouldEqual, item.Description.Name)
 				}
 			}
+
+		})
+	})
+}
+
+func TestReadEmptyDataToHierarchy(t *testing.T) {
+
+	Convey("Given a reader containing nothing", t, func() {
+		readcloser := ioutil.NopCloser(strings.NewReader("{}"))
+
+		Convey("When read into a hierarchy", func() {
+			defer func() {
+				r := recover()
+				So(r, ShouldNotBeNil)
+				So(r, ShouldEqual, nilErrorMessage)
+			}()
+			readHierarchy(readcloser)
 
 		})
 	})

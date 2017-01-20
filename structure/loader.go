@@ -11,6 +11,8 @@ import (
 	. "github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
 )
 
+const nilErrorMessage = "Structure or CodeLists is null"
+
 func LoadStructure(endpoint string) []*Hierarchy {
 	reader := parser.OpenReader(endpoint)
 	defer reader.Close()
@@ -40,6 +42,9 @@ func readData(reader io.ReadCloser) *StructuralData {
 
 func convertToHierarchy(data *StructuralData) []*Hierarchy {
 
+	if data == nil || data.Structure == nil || data.Structure.CodeLists == nil {
+		panic(nilErrorMessage)
+	}
 	var hierarchies []*Hierarchy
 
 	for i, codeList := range data.Structure.CodeLists.CodeList {
@@ -54,24 +59,11 @@ func convertToHierarchy(data *StructuralData) []*Hierarchy {
 			entry := NewEntry()
 			entry.Code = item.Value
 			entry.ParentCode = item.Parent
-			entry.Codename = item.Description.Name
 			entry.Names[item.Description.Lang] = item.Description.Name
 			hierarchy.Entries[entry.Code] = entry
 		}
 
-		for _, entry := range hierarchy.Entries {
-			entry.Level = countLevel(entry, hierarchy.Entries)
-		}
 	}
 	return hierarchies
 }
 
-func countLevel(entry Entry, entries map[string]Entry) int {
-	if len(entry.ParentCode) == 0 {
-		return 0
-	}
-	if parent, ok := entries[entry.ParentCode]; ok {
-		return countLevel(parent, entries) + 1
-	}
-	return -1
-}

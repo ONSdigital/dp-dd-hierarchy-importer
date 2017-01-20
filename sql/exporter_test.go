@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"io/ioutil"
+	"strconv"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -15,62 +15,100 @@ var sampleHierarchy = Hierarchy{
 	Id:    "myHierarchyId",
 	Names: map[string]string{"en": "my hierarchy name"},
 	Entries: map[string]Entry{
-		"c":      {Code: "c", Codename: "level c", Abbreviation: "abc", Level: 2, ParentCode: "b", Names: map[string]string{"en": "level c name", "cy": "welsh name"}},
-		"b":      {Code: "b", Codename: "level b", Abbreviation: "ab", Level: 1, ParentCode: "a", Names: map[string]string{"en": "level b name", "cy": "welsh name"}},
-		"a":      {Code: "a", Codename: "level a", Abbreviation: "a", Level: 0, ParentCode: "", Names: map[string]string{"en": "level a name", "cy": "welsh name"}},
-		"orphan": {Code: "orphan", Codename: "orphan level", Abbreviation: "orphan", Level: 2, ParentCode: "x", Names: map[string]string{"en": "orphan 'name'", "cy": "welsh name"}},
+		"c":      {Code: "c", AreaType: "C", ParentCode: "b", Names: map[string]string{"en": "level c name", "cy": "welsh name"}},
+		"b":      {Code: "b", AreaType: "B", ParentCode: "a", Names: map[string]string{"en": "level b name", "cy": "welsh name"}},
+		"a":      {Code: "a", AreaType: "A", ParentCode: "", Names: map[string]string{"en": "level a name", "cy": "welsh name"}},
+		"orphan": {Code: "orphan", AreaType: "C", ParentCode: "x", Names: map[string]string{"en": "orphan 'name'", "cy": "welsh name"}},
+	},
+	AreaTypes: map[string]LevelType{
+		"A": {Id: "A", Level: 1, Name: "Level 1 -A"},
+		"B": {Id: "B", Level: 2, Name: "Level 2 -B"},
+		"C": {Id: "C", Level: 3, Name: "Level 3 -C"},
 	},
 }
 
 func TestWriteInserts(t *testing.T) {
 
-	Convey("When WriteInserts is invoked with a hierarchy", t, func() {
+	Convey("When WriteSql is invoked with a hierarchy", t, func() {
 		var buffer bytes.Buffer
 		writer := bufio.NewWriter(&buffer)
-		WriteInserts(writer, &sampleHierarchy)
+		WriteSql(writer, &sampleHierarchy)
 		writer.Flush()
-		ioutil.WriteFile("/home/matt/temp/output.sql", buffer.Bytes(), 0644)
 		var lines []string
 		scanner := bufio.NewScanner(bufio.NewReader(&buffer))
 		for scanner.Scan() {
 			lines = append(lines, scanner.Text())
 		}
 
-		Convey("Then insert statements should appear in the correct order, with hierarchy separated from the rest by a blank line", func() {
-			So(len(lines), ShouldEqual, 6)
+		Convey("Then insert statements should appear in the correct order: hierarchy, area types; entries", func() {
+			So(len(lines), ShouldEqual, (2 + len(sampleHierarchy.AreaTypes) + 1 + len(sampleHierarchy.Entries)))
 
+			idx := 0
 			// insert hierarchy
-			line := lines[0]
+			line := lines[idx]
+			idx++
 			So(line, ShouldStartWith, "insert into hierarchy ")
 			So(line, ShouldContainSubstring, sampleHierarchy.Names["en"])
 
 			// blank line
-			line = lines[1]
+			line = lines[idx]
+			idx++
 			So(len(strings.Trim(line, " ")), ShouldEqual, 0)
 
-			// entry inserts should be a,b,c, with a commented-out orphan at any point
-			var entries []string
-			var orphan string
-			for _, s := range lines[2:] {
-				if strings.HasPrefix(s, "--") {
-					orphan = s
+			// area types
+			for _, area := range []string{"A", "B", "C"} {
+				line := lines[idx]
+				idx++
+				So(line, ShouldStartWith, "insert into hierarchy_area_type ")
+				So(line, ShouldContainSubstring, "'"+sampleHierarchy.AreaTypes[area].Name+"'")
+				So(line, ShouldContainSubstring, strconv.Itoa(sampleHierarchy.AreaTypes[area].Level))
+			}
+
+			// blank line
+			line = lines[idx]
+			idx++
+			So(len(strings.Trim(line, " ")), ShouldEqual, 0)
+
+			// entries
+			for _, e := range []string{"a", "b", "c"} {
+				line := lines[idx]
+				idx++
+				entry := sampleHierarchy.Entries[e]
+				So(line, ShouldStartWith, "insert into hierarchy_entry ")
+				So(line, ShouldContainSubstring, "'"+entry.Code+"'")
+				if len(entry.ParentCode) == 0 {
+					So(line, ShouldContainSubstring, "null")
 				} else {
-					entries = append(entries, s)
+					So(line, ShouldContainSubstring, "'"+entry.ParentCode+"'")
 				}
 			}
-			line = entries[0]
-			So(line, ShouldStartWith, "insert into hierarchy_entry ")
-			So(line, ShouldContainSubstring, "'a', null")
-			line = entries[1]
-			So(line, ShouldStartWith, "insert into hierarchy_entry ")
-			So(line, ShouldContainSubstring, "'b'")
-			line = entries[2]
-			So(line, ShouldStartWith, "insert into hierarchy_entry ")
-			So(line, ShouldContainSubstring, "'c'")
 
+			orphan := lines[idx]
 			So(orphan, ShouldStartWith, "--insert into hierarchy_entry ")
 			So(orphan, ShouldContainSubstring, "'orphan'")
 			So(orphan, ShouldContainSubstring, "orphan ''name'''")
 		})
 	})
+}
+
+var flat = Hierarchy{
+	Id:    "flat",
+	Names: map[string]string{"en": "my hierarchy name"},
+	Entries: map[string]Entry{
+		"c": {Code: "c", ParentCode: "a", Names: map[string]string{"en": "level c name", "cy": "welsh name"}},
+		"b": {Code: "b", ParentCode: "a", Names: map[string]string{"en": "level b name", "cy": "welsh name"}},
+		"a": {Code: "a", ParentCode: "", Names: map[string]string{"en": "level a name", "cy": "welsh name"}},
+	},
+	AreaTypes: map[string]LevelType{},
+}
+
+func TestShouldWriteSql(t *testing.T) {
+
+	if ShouldWriteSql(&flat) {
+		t.Errorf("Should not write sql when hierarchy is flat, but got true from call to ShouldWriteSql")
+	}
+
+	if !ShouldWriteSql(&sampleHierarchy) {
+		t.Errorf("Should write sql when hierarchy is not flat, but got false from call to ShouldWriteSql")
+	}
 }

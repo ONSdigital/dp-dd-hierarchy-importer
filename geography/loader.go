@@ -5,7 +5,10 @@ import (
 
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/parser"
 	. "github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
+	"fmt"
 )
+
+const nilErrorMessage = "ons or ons.geographyList is nil"
 
 func LoadGeography(endpoint string) *Hierarchy {
 	reader := parser.OpenReader(endpoint)
@@ -21,6 +24,10 @@ func readHierarchy(reader io.ReadCloser) *Hierarchy {
 
 func convertToHierarchy(data *GeographicData) *Hierarchy {
 
+	if data == nil || data.ONS == nil || data.ONS.GeographyList == nil {
+		panic(nilErrorMessage)
+	}
+
 	hierarchy := NewHierarchy()
 	geog := data.ONS.GeographyList
 
@@ -34,9 +41,15 @@ func convertToHierarchy(data *GeographicData) *Hierarchy {
 		entry := NewEntry()
 		entry.Code = code
 		if item.AreaType != nil {
-			entry.Level = int(item.AreaType.Level)
-			entry.Abbreviation = item.AreaType.Abbreviation
-			entry.Codename = item.AreaType.Codename
+			key := item.AreaType.Abbreviation
+			if area, exists := hierarchy.AreaTypes[key]; exists {
+				if (area.Name != item.AreaType.Codename) {
+					fmt.Println("WARNING: AreaType %s is defined multiple times with different names - '%s', '$s'", key, area.Name, item.AreaType.Codename)
+				}
+			} else {
+				hierarchy.AreaTypes[key] = LevelType{Id:key,Name:item.AreaType.Codename, Level:int(item.AreaType.Level)}
+			}
+			entry.AreaType = key
 		}
 		entry.ParentCode = item.ParentCode
 		for _, label := range item.Labels.Label {

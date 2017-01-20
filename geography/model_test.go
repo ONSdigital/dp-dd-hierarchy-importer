@@ -7,6 +7,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+// OrignalJson extracted from: http://web.ons.gov.uk/ons/api/data/hierarchies/hierarchy/2011STATH.json?apikey=API_KEY&levels=1,2,3,4
 var OriginalJson = `{
   "ons": {
     "geographyList": {
@@ -89,6 +90,50 @@ var OriginalJson = `{
               "abbreviation": "GB",
               "codename": "Great Britain",
               "level": 1
+            },
+            "subthresholdAreas": ""
+          },
+          {
+            "labels": {
+              "label": [
+                {
+                  "@xml.lang": "en",
+                  "$": "England"
+                },
+                {
+                  "@xml.lang": "cy",
+                  "$": "Lloegr"
+                }
+              ]
+            },
+            "itemCode": "E92000001",
+            "parentCode": "K04000001",
+            "areaType": {
+              "abbreviation": "CTRY",
+              "codename": "Country",
+              "level": 3
+            },
+            "subthresholdAreas": ""
+          },
+          {
+            "labels": {
+              "label": [
+                {
+                  "@xml.lang": "en",
+                  "$": "Wales"
+                },
+                {
+                  "@xml.lang": "cy",
+                  "$": "Cymru"
+                }
+              ]
+            },
+            "itemCode": "W92000004",
+            "parentCode": "K04000001",
+            "areaType": {
+              "abbreviation": "CTRY",
+              "codename": "Country",
+              "level": 3
             },
             "subthresholdAreas": ""
           }
