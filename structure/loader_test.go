@@ -3,11 +3,9 @@ package structure
 import (
 	"encoding/json"
 	"io/ioutil"
-	"strconv"
 	"strings"
 	"testing"
 
-	"github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -26,14 +24,9 @@ func TestReadDataToHierarchy(t *testing.T) {
 			So(hierarchies, ShouldNotBeNil)
 			So(len(hierarchies), ShouldEqual, 2)
 
-			hierarchyMap := make(map[string]sql.Hierarchy)
-			for _, h := range hierarchies {
-				hierarchyMap[h.ID] = *h
-			}
-
 			for i, item := range originalData.Structure.CodeLists.CodeList {
-				id := item.ID + "_" + strconv.Itoa(i)
-				hierarchy := hierarchyMap[id]
+				id := item.ID
+				hierarchy := hierarchies[i]
 				So(hierarchy, ShouldNotBeNil)
 				So(hierarchy.ID, ShouldEqual, id)
 				So(hierarchy.HierarchyType, ShouldEqual, "classification")

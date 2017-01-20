@@ -31,6 +31,7 @@ func convertToHierarchy(data *GeographicData) *sql.Hierarchy {
 	}
 
 	hierarchy := sql.NewHierarchy()
+	hierarchy.HierarchyType = "geography"
 	geog := data.ONS.GeographyList
 
 	hierarchy.ID = geog.Geography.ID

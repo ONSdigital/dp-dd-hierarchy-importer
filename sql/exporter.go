@@ -10,7 +10,7 @@ import (
 const (
 	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name, hierarchy_type) values (%s, %s, %s);\n"
 	areaSQL      = "insert into hierarchy_area_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
-	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, area_type) values (%s, %s, %s, %s, %s);\n"
+	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, area_type, display_order) values (%s, %s, %s, %s, %s, %d);\n"
 )
 
 // WriteSQL writes sql insert statements to the given writer to create the given hierarchy in a db.
@@ -89,8 +89,7 @@ func writeEntry(writer io.Writer, entry *Entry, hierarchyID string, entries map[
 		if parent, ok := entries[entry.ParentCode]; ok {
 			writeEntry(writer, &parent, hierarchyID, entries, written)
 		} else {
-			fmt.Printf("!! Entry '%s' has an unknown parent '%s' - commenting out the insert\n", entry.Code, entry.ParentCode)
-			io.WriteString(writer, "--")
+			fmt.Printf("!! Entry '%s' has an unknown parent '%s' - the hierarchy is incomplete and some insert statements will fail\n", entry.Code, entry.ParentCode)
 		}
 	}
 	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(hierarchyID), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType), entry.DisplayOrder))

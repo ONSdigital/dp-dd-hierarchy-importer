@@ -48,11 +48,12 @@ func convertToHierarchy(data *StructuralData) []*sql.Hierarchy {
 	}
 	var hierarchies []*sql.Hierarchy
 
-	for i, codeList := range data.Structure.CodeLists.CodeList {
+	for _, codeList := range data.Structure.CodeLists.CodeList {
 		hierarchy := sql.NewHierarchy()
+		hierarchy.HierarchyType = "classification"
 		hierarchies = append(hierarchies, &hierarchy)
 
-		hierarchy.ID = codeList.ID + "_" + strconv.Itoa(i)
+		hierarchy.ID = codeList.ID
 		for _, name := range codeList.Names {
 			hierarchy.Names[name.Lang] = name.Name
 		}

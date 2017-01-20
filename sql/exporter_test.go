@@ -84,7 +84,7 @@ func TestWriteInserts(t *testing.T) {
 			}
 
 			orphan := lines[idx]
-			So(orphan, ShouldStartWith, "--insert into hierarchy_entry ")
+			So(orphan, ShouldStartWith, "insert into hierarchy_entry ")
 			So(orphan, ShouldContainSubstring, "'orphan'")
 			So(orphan, ShouldContainSubstring, "orphan ''name'''")
 		})
