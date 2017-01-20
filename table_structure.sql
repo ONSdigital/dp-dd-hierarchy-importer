@@ -1,11 +1,12 @@
 CREATE TABLE hierarchy (
   hierarchy_id VARCHAR NOT NULL,
   hierarchy_name VARCHAR,
+  hierarchy_type VARCHAR,
   PRIMARY KEY( hierarchy_id )
 );
 
 CREATE TABLE hierarchy_area_type (
-  id VARCHAR,
+  id VARCHAR NOT NULL,
   name VARCHAR,
   level INTEGER,
   PRIMARY KEY( id )
@@ -17,6 +18,7 @@ CREATE TABLE hierarchy_entry (
   parent_code VARCHAR,
   name VARCHAR,
   area_type VARCHAR,
+  display_order INTEGER,
   PRIMARY KEY( hierarchy_id, entry_code ),
   FOREIGN KEY (hierarchy_id) REFERENCES hierarchy (hierarchy_id),
   FOREIGN KEY (area_type) REFERENCES hierarchy_area_type (id),

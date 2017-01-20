@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name) values (%s, %s);\n"
+	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name, hierarchy_type) values (%s, %s, %s);\n"
 	areaSQL      = "insert into hierarchy_area_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
 	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, area_type) values (%s, %s, %s, %s, %s);\n"
 )
@@ -21,7 +21,7 @@ func WriteSQL(writer io.Writer, hierarchy *Hierarchy) {
 	if len(hierarchy.ID) == 0 {
 		panic("Cannot write sql for a hierarchy without an id!")
 	}
-	io.WriteString(writer, fmt.Sprintf(hierarchySQL, quote(hierarchy.ID), quote(hierarchy.Names["en"])))
+	io.WriteString(writer, fmt.Sprintf(hierarchySQL, quote(hierarchy.ID), quote(hierarchy.Names["en"]), quote(hierarchy.HierarchyType)))
 
 	io.WriteString(writer, "\n")
 	writeAreaTypes(writer, hierarchy.AreaTypes)
@@ -93,7 +93,7 @@ func writeEntry(writer io.Writer, entry *Entry, hierarchyID string, entries map[
 			io.WriteString(writer, "--")
 		}
 	}
-	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(hierarchyID), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType)))
+	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(hierarchyID), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType), entry.DisplayOrder))
 	written[entry.Code] = true
 }
 

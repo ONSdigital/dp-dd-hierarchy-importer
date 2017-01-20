@@ -61,7 +61,8 @@ There can be multiple classifications in a single json file, with the same id an
 - Socio-Economic: none
 - Social: none
 
-Concepts are hierarchical, having a parent, level, order and collection count. However, the hierarchy is very flat (no entry ever has a grandparent) and seems to be more of a list of multi-value properties. We won't import these.
+Concepts are hierarchical, having a parent, level, order and collection count. 
+However, the hierarchy is very flat (no entry ever has a grandparent) and seems to be more of a list of multi-value properties. We won't import these.
 
 ## Non-hierachical data:
 

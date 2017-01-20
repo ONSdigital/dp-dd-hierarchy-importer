@@ -14,6 +14,7 @@ import (
 )
 
 var hierarchyType = flag.String("type", "", "'g' (geographical hierarchy) or 's' (structural hierarchy)")
+var printTree = flag.String("tree", "", "If specified, 'b' will write a tree showing the hierarchy excluding leaf nodes, l will include leaf nodes")
 
 func main() {
 	defer func() {
@@ -33,6 +34,7 @@ func main() {
 	}
 	for _, h := range hierarchies {
 		writeSQLForHierarchy(dir, h)
+		writeTreeForHierarchy(dir, h)
 	}
 
 }
@@ -48,6 +50,7 @@ func checkCommandLineArgs() {
 		fmt.Println(exe + " -type=s 'http://web.ons.gov.uk/ons/api/data/classification/CL_0000641.json?apikey=XXXXX&context=Economic'")
 		fmt.Println("or")
 		fmt.Println(exe + " -type=g /tmp/localfile.json")
+		fmt.Println("There is also a 'tree=b or -tree=l option, which will write a tree depiction of the hierarchy excluding leaves (b) or including them (l)")
 		os.Exit(0)
 	}
 }
@@ -77,6 +80,21 @@ func writeSQLForHierarchy(dir string, h *sql.Hierarchy) {
 	}
 	sql.WriteSQL(file, h)
 	fmt.Printf("Finished writing %s with %d entries\n", filename, len(h.Entries))
+}
+
+func writeTreeForHierarchy(dir string, h *sql.Hierarchy) {
+	if len(*printTree) == 0 {
+		return
+	}
+	filename := filepath.Join(dir, h.ID+"_tree.txt")
+	fmt.Printf("Creating tree %s\n", filename)
+	file, err := os.Create(filename)
+	defer file.Close()
+	if err != nil {
+		log.Fatal("Cannot create file", err)
+	}
+	includeEmpty := *printTree == "l"
+	sql.WriteTree(file, h, includeEmpty)
 }
 
 func getWorkingDir() string {

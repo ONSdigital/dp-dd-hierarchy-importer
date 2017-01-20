@@ -22,6 +22,7 @@ func TestReadDataToHierarchy(t *testing.T) {
 
 			So(hierarchy, ShouldNotBeNil)
 			So(hierarchy.ID, ShouldEqual, "2011STATH")
+			So(hierarchy.HierarchyType, ShouldEqual, "geography")
 			So(hierarchy.Names["en"], ShouldEqual, "2011 Statistical Geography Hierarchy")
 			So(hierarchy.Names["cy"], ShouldEqual, "Hierarchaeth Daearyddiaeth Ystadegol 2011")
 			So(len(hierarchy.Entries), ShouldEqual, 5)

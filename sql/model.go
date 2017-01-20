@@ -2,10 +2,11 @@ package sql
 
 // Hierarchy represents a complete hierarchy
 type Hierarchy struct {
-	ID        string
-	Names     map[string]string
-	Entries   map[string]Entry
-	AreaTypes map[string]LevelType
+	ID            string
+	Names         map[string]string
+	Entries       map[string]Entry
+	AreaTypes     map[string]LevelType
+	HierarchyType string
 }
 
 // NewHierarchy returns a properly initialised Hierarchy
@@ -26,10 +27,11 @@ type LevelType struct {
 
 // Entry is a single entry in a hierarchy
 type Entry struct {
-	Code       string
-	ParentCode string
-	AreaType   string
-	Names      map[string]string
+	Code         string
+	ParentCode   string
+	AreaType     string
+	Names        map[string]string
+	DisplayOrder int
 }
 
 // NewEntry returns a properly initialised Entry

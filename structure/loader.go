@@ -61,6 +61,12 @@ func convertToHierarchy(data *StructuralData) []*sql.Hierarchy {
 			entry.Code = item.Value
 			entry.ParentCode = item.Parent
 			entry.Names[item.Description.Lang] = item.Description.Name
+			for _, a := range item.Annotations.Annotation {
+				if a.AnnotationType == "DisplayOrder" {
+					i, _ := strconv.Atoi(a.AnnotationText.Name)
+					entry.DisplayOrder = i
+				}
+			}
 			hierarchy.Entries[entry.Code] = entry
 		}
 

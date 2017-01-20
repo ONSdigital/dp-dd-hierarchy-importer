@@ -36,6 +36,7 @@ func TestReadDataToHierarchy(t *testing.T) {
 				hierarchy := hierarchyMap[id]
 				So(hierarchy, ShouldNotBeNil)
 				So(hierarchy.ID, ShouldEqual, id)
+				So(hierarchy.HierarchyType, ShouldEqual, "classification")
 				So(hierarchy.Names["en"], ShouldEqual, item.Names[0].Name)
 				So(len(hierarchy.Entries), ShouldEqual, len(item.Codes))
 				for _, item := range item.Codes {
