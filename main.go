@@ -87,7 +87,7 @@ func writeSQLForHierarchy(filePrefix string, h *sql.Hierarchy) {
 	}
 	filename := filePrefix + ".sql"
 	fmt.Printf("Creating sql file %s\n", filename)
-	file, err := os.Create(filename + ".sql")
+	file, err := os.Create(filename)
 	defer file.Close()
 	if err != nil {
 		log.Fatal("Cannot create file", err)
