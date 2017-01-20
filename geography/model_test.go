@@ -7,7 +7,8 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-var OriginalJson = `{
+// OrignalJSON extracted from: http://web.ons.gov.uk/ons/api/data/hierarchies/hierarchy/2011STATH.json?apikey=API_KEY&levels=1,2,3,4
+var OriginalJSON = `{
   "ons": {
     "geographyList": {
       "geography": {
@@ -91,6 +92,50 @@ var OriginalJson = `{
               "level": 1
             },
             "subthresholdAreas": ""
+          },
+          {
+            "labels": {
+              "label": [
+                {
+                  "@xml.lang": "en",
+                  "$": "England"
+                },
+                {
+                  "@xml.lang": "cy",
+                  "$": "Lloegr"
+                }
+              ]
+            },
+            "itemCode": "E92000001",
+            "parentCode": "K04000001",
+            "areaType": {
+              "abbreviation": "CTRY",
+              "codename": "Country",
+              "level": 3
+            },
+            "subthresholdAreas": ""
+          },
+          {
+            "labels": {
+              "label": [
+                {
+                  "@xml.lang": "en",
+                  "$": "Wales"
+                },
+                {
+                  "@xml.lang": "cy",
+                  "$": "Cymru"
+                }
+              ]
+            },
+            "itemCode": "W92000004",
+            "parentCode": "K04000001",
+            "areaType": {
+              "abbreviation": "CTRY",
+              "codename": "Country",
+              "level": 3
+            },
+            "subthresholdAreas": ""
           }
         ]
       }
@@ -101,15 +146,15 @@ var OriginalJson = `{
 func TestMarshalAndUnmarshal(t *testing.T) {
 	Convey("When json is unmarshaled", t, func() {
 		var data *GeographicData
-		err := json.Unmarshal([]byte(OriginalJson), &data)
+		err := json.Unmarshal([]byte(OriginalJSON), &data)
 
 		So(err, ShouldBeNil)
 
 		Convey("When json is marshaled again", func() {
-			newJson, err := json.MarshalIndent(&data, "", "  ")
+			newJSON, err := json.MarshalIndent(&data, "", "  ")
 
 			So(err, ShouldBeNil)
-			So(string(newJson), ShouldEqual, OriginalJson)
+			So(string(newJSON), ShouldEqual, OriginalJSON)
 		})
 	})
 }

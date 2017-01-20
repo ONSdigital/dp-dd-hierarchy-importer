@@ -8,16 +8,19 @@ import (
 	"strconv"
 
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/parser"
-	. "github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
+	"github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
 )
 
-func LoadStructure(endpoint string) []*Hierarchy {
+const nilErrorMessage = "Structure or CodeLists is null"
+
+// LoadStructure reads the contents of an endpoint as a classification structure, returns a slice of hierarchies
+func LoadStructure(endpoint string) []*sql.Hierarchy {
 	reader := parser.OpenReader(endpoint)
 	defer reader.Close()
 	return readHierarchy(reader)
 }
 
-func readHierarchy(reader io.ReadCloser) []*Hierarchy {
+func readHierarchy(reader io.ReadCloser) []*sql.Hierarchy {
 	data := readData(reader)
 	return convertToHierarchy(data)
 }
@@ -38,40 +41,29 @@ func readData(reader io.ReadCloser) *StructuralData {
 
 }
 
-func convertToHierarchy(data *StructuralData) []*Hierarchy {
+func convertToHierarchy(data *StructuralData) []*sql.Hierarchy {
 
-	var hierarchies []*Hierarchy
+	if data == nil || data.Structure == nil || data.Structure.CodeLists == nil {
+		panic(nilErrorMessage)
+	}
+	var hierarchies []*sql.Hierarchy
 
 	for i, codeList := range data.Structure.CodeLists.CodeList {
-		hierarchy := NewHierarchy()
+		hierarchy := sql.NewHierarchy()
 		hierarchies = append(hierarchies, &hierarchy)
 
-		hierarchy.Id = codeList.Id + "_" + strconv.Itoa(i)
+		hierarchy.ID = codeList.ID + "_" + strconv.Itoa(i)
 		for _, name := range codeList.Names {
 			hierarchy.Names[name.Lang] = name.Name
 		}
 		for _, item := range codeList.Codes {
-			entry := NewEntry()
+			entry := sql.NewEntry()
 			entry.Code = item.Value
 			entry.ParentCode = item.Parent
-			entry.Codename = item.Description.Name
 			entry.Names[item.Description.Lang] = item.Description.Name
 			hierarchy.Entries[entry.Code] = entry
 		}
 
-		for _, entry := range hierarchy.Entries {
-			entry.Level = countLevel(entry, hierarchy.Entries)
-		}
 	}
 	return hierarchies
-}
-
-func countLevel(entry Entry, entries map[string]Entry) int {
-	if len(entry.ParentCode) == 0 {
-		return 0
-	}
-	if parent, ok := entries[entry.ParentCode]; ok {
-		return countLevel(parent, entries) + 1
-	}
-	return -1
 }
