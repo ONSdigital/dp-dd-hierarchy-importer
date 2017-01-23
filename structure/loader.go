@@ -37,15 +37,16 @@ func readData(reader io.ReadCloser) *StructuralData {
 
 	var data *StructuralData
 	err = json.Unmarshal(body, &data)
+	if data == nil || data.Structure == nil || data.Structure.CodeLists == nil {
+		fmt.Printf(nilErrorMessage+" - source content: %s\n", body)
+		panic(nilErrorMessage)
+	}
 	return data
 
 }
 
 func convertToHierarchy(data *StructuralData) []*sql.Hierarchy {
 
-	if data == nil || data.Structure == nil || data.Structure.CodeLists == nil {
-		panic(nilErrorMessage)
-	}
 	var hierarchies []*sql.Hierarchy
 
 	for _, codeList := range data.Structure.CodeLists.CodeList {

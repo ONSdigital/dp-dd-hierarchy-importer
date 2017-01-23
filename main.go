@@ -71,6 +71,7 @@ func checkCommandLineArgs() {
 
 func loadHierarchies(t string, file string) []*sql.Hierarchy {
 	var hierarchies []*sql.Hierarchy
+	fmt.Printf("Importing hierarchies from %s\n", file)
 	switch t {
 	case "g":
 		hierarchies = append(hierarchies, geography.LoadGeography(file))
