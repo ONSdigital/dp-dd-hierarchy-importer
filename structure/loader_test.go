@@ -24,7 +24,7 @@ func TestReadDataToHierarchy(t *testing.T) {
 			So(hierarchies, ShouldNotBeNil)
 			So(len(hierarchies), ShouldEqual, 2)
 
-			for i, item := range originalData.Structure.CodeLists.CodeList {
+			for i, item := range originalData.Structure.GetCodeLists() {
 				id := item.ID
 				hierarchy := hierarchies[i]
 				So(hierarchy, ShouldNotBeNil)
@@ -56,6 +56,22 @@ func TestReadEmptyDataToHierarchy(t *testing.T) {
 				r := recover()
 				So(r, ShouldNotBeNil)
 				So(r, ShouldEqual, nilErrorMessage)
+			}()
+			readHierarchy(readcloser)
+
+		})
+	})
+}
+
+func TestReadInvalidDataToHierarchy(t *testing.T) {
+
+	Convey("Given a reader containing invalid json", t, func() {
+		readcloser := ioutil.NopCloser(strings.NewReader("{\"Structure\":{\"Header\":{\"ID\":\"REGISTRY_RESPONSE\",\"Telephone\":\"0845 601 3034\"}},\"Extracted\":\"2017-01-23T09:23:37.245Z\"},\"CodeLists\":{\"CodeList\":{"))
+
+		Convey("When read into a hierarchy", func() {
+			defer func() {
+				r := recover()
+				So(r, ShouldNotBeNil)
 			}()
 			readHierarchy(readcloser)
 

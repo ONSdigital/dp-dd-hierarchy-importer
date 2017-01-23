@@ -9,8 +9,8 @@ import (
 
 const (
 	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name, hierarchy_type) values (%s, %s, %s);\n"
-	areaSQL      = "insert into hierarchy_area_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
-	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, area_type, display_order) values (%s, %s, %s, %s, %s, %d);\n"
+	areaSQL      = "insert into hierarchy_level_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
+	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, level_type, display_order) values (%s, %s, %s, %s, %s, %d);\n"
 )
 
 // WriteSQL writes sql insert statements to the given writer to create the given hierarchy in a db.
@@ -31,14 +31,16 @@ func WriteSQL(writer io.Writer, hierarchy *Hierarchy) {
 
 }
 
-// ShouldWriteSQL returns true if the hierarchy has sufficient depth (at least one entry has grandchildren)
-func ShouldWriteSQL(hierarchy *Hierarchy) bool {
+// Depth returns the maximum depth of the hierarchy
+func (hierarchy Hierarchy) Depth() int {
+	maxDepth := 0
 	for _, entry := range hierarchy.Entries {
-		if countLevel(entry, hierarchy.Entries) > 1 {
-			return true
+		depth := countLevel(entry, hierarchy.Entries) + 1
+		if depth > maxDepth {
+			maxDepth = depth
 		}
 	}
-	return false
+	return maxDepth
 }
 
 func countLevel(entry Entry, entries map[string]Entry) int {

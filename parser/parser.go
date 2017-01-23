@@ -42,9 +42,20 @@ func Parse(reader io.ReadCloser, data interface{}) {
 
 	err = json.Unmarshal(body, data)
 	if err != nil {
-		fmt.Printf("Unable to marshal data into %T: %s\n", data, err)
-		fmt.Printf("Tried to read:\n%s\n", string(body))
-		panic(err.Error())
+		switch t := err.(type) {
+		case *json.SyntaxError:
+			jsn := string(body[0:t.Offset])
+			jsn += "<--(Invalid Character)"
+			fmt.Printf("Invalid character at offset %v\n %s\n", t.Offset, jsn)
+		case *json.UnmarshalTypeError:
+			jsn := string(body[0:t.Offset])
+			jsn += "<--(Invalid Type)"
+			fmt.Printf("Invalid value at offset %v\n %s\n", t.Offset, jsn)
+			fmt.Println("You might need to save the json file locally and validate the format - e.g. classifications with a single CodeList are known to be in an invalid format. See the readme for details.")
+		default:
+			fmt.Printf("Unable to unmarshal data. Error=%T, data=%s\n", t, string(body))
+		}
+		panic(err)
 	}
 
 }

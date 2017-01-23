@@ -82,9 +82,9 @@ func loadHierarchies(t string, file string) []*sql.Hierarchy {
 }
 
 func writeSQLForHierarchy(filePrefix string, h *sql.Hierarchy) {
-	if !sql.ShouldWriteSQL(h) {
-		fmt.Printf("Hierarchy %s is flat - not writing sql\n", h.ID)
-		return
+	depth := h.Depth()
+	if depth < 3 {
+		fmt.Printf("Hierarchy %s is only has a depth of %d - are you sure this qualifies as a hierarchy?\n", h.ID, depth)
 	}
 	filename := filePrefix + ".sql"
 	fmt.Printf("Creating sql file %s\n", filename)

@@ -59,7 +59,7 @@ func TestWriteInserts(t *testing.T) {
 			for _, area := range []string{"A", "B", "C"} {
 				line := lines[idx]
 				idx++
-				So(line, ShouldStartWith, "insert into hierarchy_area_type ")
+				So(line, ShouldStartWith, "insert into hierarchy_level_type ")
 				So(line, ShouldContainSubstring, "'"+sampleHierarchy.AreaTypes[area].Name+"'")
 				So(line, ShouldContainSubstring, strconv.Itoa(sampleHierarchy.AreaTypes[area].Level))
 			}
@@ -102,13 +102,11 @@ var flat = Hierarchy{
 	AreaTypes: map[string]LevelType{},
 }
 
-func TestShouldWriteSQL(t *testing.T) {
+func TestHierarchyDepth(t *testing.T) {
 
-	if ShouldWriteSQL(&flat) {
-		t.Errorf("Should not write sql when hierarchy is flat, but got true from call to ShouldWriteSQL")
-	}
-
-	if !ShouldWriteSQL(&sampleHierarchy) {
-		t.Errorf("Should write sql when hierarchy is not flat, but got false from call to ShouldWriteSQL")
-	}
+	Convey("When WriteSQL is invoked with a hierarchy", t, func() {
+		So(sampleHierarchy.Depth(), ShouldEqual, 3)
+		So(flat.Depth(), ShouldEqual, 2)
+		So(Hierarchy{}.Depth(), ShouldEqual, 0)
+	})
 }
