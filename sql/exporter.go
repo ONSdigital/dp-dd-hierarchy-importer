@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name, hierarchy_type) values (%s, %s, %s);\n"
-	areaSQL      = "insert into hierarchy_level_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
-	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, level_type, display_order) values (%s, %s, %s, %s, %s, %d);\n"
+	hierarchySQL = "insert into dimension (dimension_id, dimension_name, dimension_type) values (%s, %s, %s);\n"
+	areaSQL      = "insert into dimension_level_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
+	entrySQL     = "insert into dimension_value (dimension_id, value_code, parent_code, name, level_type, display_order) values (%s, %s, %s, %s, %s, %d);\n"
 )
 
 // WriteSQL writes sql insert statements to the given writer to create the given hierarchy in a db.
