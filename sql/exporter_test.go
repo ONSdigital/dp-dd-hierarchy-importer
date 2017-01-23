@@ -104,7 +104,7 @@ var flat = Hierarchy{
 
 func TestHierarchyDepth(t *testing.T) {
 
-	Convey("When WriteSQL is invoked with a hierarchy", t, func() {
+	Convey("When Depth is invoked on a hierarchy", t, func() {
 		So(sampleHierarchy.Depth(), ShouldEqual, 3)
 		So(flat.Depth(), ShouldEqual, 2)
 		So(Hierarchy{}.Depth(), ShouldEqual, 0)

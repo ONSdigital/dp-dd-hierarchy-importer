@@ -54,9 +54,6 @@ One possible (flat) classification list is time: http://web.ons.gov.uk/ons/api/d
 
 There can be multiple classifications in a single json file, with the same id and overlapping entries.
 
-**Note that the existing data api returns inconsistent json depending on whether there are multiple classifications.** 
-If there is a single classification the api returns a single CodeList rather than an array of Codelists. This will break the importer - you must save the json and fix the structure before importing.
-
 ## Concepts
  are refined by Context
 - Census:  http://web.ons.gov.uk/ons/api/data/concepts.xml?apikey=API_KEY&context=Census&find=&concept=
