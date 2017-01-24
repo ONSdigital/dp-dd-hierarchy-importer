@@ -3,11 +3,9 @@ package structure
 import (
 	"encoding/json"
 	"io/ioutil"
-	"strconv"
 	"strings"
 	"testing"
 
-	"github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -26,16 +24,12 @@ func TestReadDataToHierarchy(t *testing.T) {
 			So(hierarchies, ShouldNotBeNil)
 			So(len(hierarchies), ShouldEqual, 2)
 
-			hierarchyMap := make(map[string]sql.Hierarchy)
-			for _, h := range hierarchies {
-				hierarchyMap[h.ID] = *h
-			}
-
-			for i, item := range originalData.Structure.CodeLists.CodeList {
-				id := item.ID + "_" + strconv.Itoa(i)
-				hierarchy := hierarchyMap[id]
+			for i, item := range originalData.Structure.GetCodeLists() {
+				id := item.ID
+				hierarchy := hierarchies[i]
 				So(hierarchy, ShouldNotBeNil)
 				So(hierarchy.ID, ShouldEqual, id)
+				So(hierarchy.HierarchyType, ShouldEqual, "classification")
 				So(hierarchy.Names["en"], ShouldEqual, item.Names[0].Name)
 				So(len(hierarchy.Entries), ShouldEqual, len(item.Codes))
 				for _, item := range item.Codes {
@@ -62,6 +56,22 @@ func TestReadEmptyDataToHierarchy(t *testing.T) {
 				r := recover()
 				So(r, ShouldNotBeNil)
 				So(r, ShouldEqual, nilErrorMessage)
+			}()
+			readHierarchy(readcloser)
+
+		})
+	})
+}
+
+func TestReadInvalidDataToHierarchy(t *testing.T) {
+
+	Convey("Given a reader containing invalid json", t, func() {
+		readcloser := ioutil.NopCloser(strings.NewReader(`{"Structure":{"Header":{"ID":"REGISTRY_RESPONSE","Telephone":"0845 601 3034"}},"Extracted":"2017-01-23T09:23:37.245Z"},"CodeLists":{"CodeList":{`))
+
+		Convey("When read into a hierarchy", func() {
+			defer func() {
+				r := recover()
+				So(r, ShouldNotBeNil)
 			}()
 			readHierarchy(readcloser)
 

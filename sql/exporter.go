@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name) values (%s, %s);\n"
-	areaSQL      = "insert into hierarchy_area_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
-	entrySQL     = "insert into hierarchy_entry (hierarchy_id, entry_code, parent_code, name, area_type) values (%s, %s, %s, %s, %s);\n"
+	hierarchySQL = "insert into dimension (dimension_id, dimension_name, dimension_type) values (%s, %s, %s);\n"
+	areaSQL      = "insert into dimension_level_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
+	entrySQL     = "insert into dimension_value (dimension_id, value_code, parent_code, name, level_type, display_order) values (%s, %s, %s, %s, %s, %d);\n"
 )
 
 // WriteSQL writes sql insert statements to the given writer to create the given hierarchy in a db.
@@ -21,7 +21,7 @@ func WriteSQL(writer io.Writer, hierarchy *Hierarchy) {
 	if len(hierarchy.ID) == 0 {
 		panic("Cannot write sql for a hierarchy without an id!")
 	}
-	io.WriteString(writer, fmt.Sprintf(hierarchySQL, quote(hierarchy.ID), quote(hierarchy.Names["en"])))
+	io.WriteString(writer, fmt.Sprintf(hierarchySQL, quote(hierarchy.ID), quote(hierarchy.Names["en"]), quote(hierarchy.HierarchyType)))
 
 	io.WriteString(writer, "\n")
 	writeAreaTypes(writer, hierarchy.AreaTypes)
@@ -31,14 +31,16 @@ func WriteSQL(writer io.Writer, hierarchy *Hierarchy) {
 
 }
 
-// ShouldWriteSQL returns true if the hierarchy has sufficient depth (at least one entry has grandchildren)
-func ShouldWriteSQL(hierarchy *Hierarchy) bool {
+// Depth returns the maximum depth of the hierarchy
+func (hierarchy Hierarchy) Depth() int {
+	maxDepth := 0
 	for _, entry := range hierarchy.Entries {
-		if countLevel(entry, hierarchy.Entries) > 1 {
-			return true
+		depth := countLevel(entry, hierarchy.Entries) + 1
+		if depth > maxDepth {
+			maxDepth = depth
 		}
 	}
-	return false
+	return maxDepth
 }
 
 func countLevel(entry Entry, entries map[string]Entry) int {
@@ -89,11 +91,10 @@ func writeEntry(writer io.Writer, entry *Entry, hierarchyID string, entries map[
 		if parent, ok := entries[entry.ParentCode]; ok {
 			writeEntry(writer, &parent, hierarchyID, entries, written)
 		} else {
-			fmt.Printf("!! Entry '%s' has an unknown parent '%s' - commenting out the insert\n", entry.Code, entry.ParentCode)
-			io.WriteString(writer, "--")
+			fmt.Printf("!! Entry '%s' has an unknown parent '%s' - the hierarchy is incomplete and some insert statements will fail\n", entry.Code, entry.ParentCode)
 		}
 	}
-	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(hierarchyID), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType)))
+	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(hierarchyID), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType), entry.DisplayOrder))
 	written[entry.Code] = true
 }
 

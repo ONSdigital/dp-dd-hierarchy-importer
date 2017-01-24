@@ -40,14 +40,14 @@ func TestWriteInserts(t *testing.T) {
 			lines = append(lines, scanner.Text())
 		}
 
-		Convey("Then insert statements should appear in the correct order: hierarchy, area types; entries", func() {
+		Convey("Then insert statements should appear in the correct order: dimension, level types; entries", func() {
 			So(len(lines), ShouldEqual, (2 + len(sampleHierarchy.AreaTypes) + 1 + len(sampleHierarchy.Entries)))
 
 			idx := 0
 			// insert hierarchy
 			line := lines[idx]
 			idx++
-			So(line, ShouldStartWith, "insert into hierarchy ")
+			So(line, ShouldStartWith, "insert into dimension ")
 			So(line, ShouldContainSubstring, sampleHierarchy.Names["en"])
 
 			// blank line
@@ -59,7 +59,7 @@ func TestWriteInserts(t *testing.T) {
 			for _, area := range []string{"A", "B", "C"} {
 				line := lines[idx]
 				idx++
-				So(line, ShouldStartWith, "insert into hierarchy_area_type ")
+				So(line, ShouldStartWith, "insert into dimension_level_type ")
 				So(line, ShouldContainSubstring, "'"+sampleHierarchy.AreaTypes[area].Name+"'")
 				So(line, ShouldContainSubstring, strconv.Itoa(sampleHierarchy.AreaTypes[area].Level))
 			}
@@ -74,7 +74,7 @@ func TestWriteInserts(t *testing.T) {
 				line := lines[idx]
 				idx++
 				entry := sampleHierarchy.Entries[e]
-				So(line, ShouldStartWith, "insert into hierarchy_entry ")
+				So(line, ShouldStartWith, "insert into dimension_value ")
 				So(line, ShouldContainSubstring, "'"+entry.Code+"'")
 				if len(entry.ParentCode) == 0 {
 					So(line, ShouldContainSubstring, "null")
@@ -84,7 +84,7 @@ func TestWriteInserts(t *testing.T) {
 			}
 
 			orphan := lines[idx]
-			So(orphan, ShouldStartWith, "--insert into hierarchy_entry ")
+			So(orphan, ShouldStartWith, "insert into dimension_value ")
 			So(orphan, ShouldContainSubstring, "'orphan'")
 			So(orphan, ShouldContainSubstring, "orphan ''name'''")
 		})
@@ -102,13 +102,11 @@ var flat = Hierarchy{
 	AreaTypes: map[string]LevelType{},
 }
 
-func TestShouldWriteSQL(t *testing.T) {
+func TestHierarchyDepth(t *testing.T) {
 
-	if ShouldWriteSQL(&flat) {
-		t.Errorf("Should not write sql when hierarchy is flat, but got true from call to ShouldWriteSQL")
-	}
-
-	if !ShouldWriteSQL(&sampleHierarchy) {
-		t.Errorf("Should write sql when hierarchy is not flat, but got false from call to ShouldWriteSQL")
-	}
+	Convey("When Depth is invoked on a hierarchy", t, func() {
+		So(sampleHierarchy.Depth(), ShouldEqual, 3)
+		So(flat.Depth(), ShouldEqual, 2)
+		So(Hierarchy{}.Depth(), ShouldEqual, 0)
+	})
 }

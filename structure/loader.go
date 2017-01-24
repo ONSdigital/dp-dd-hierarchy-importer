@@ -1,10 +1,7 @@
 package structure
 
 import (
-	"encoding/json"
-	"fmt"
 	"io"
-	"io/ioutil"
 	"strconv"
 
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/parser"
@@ -27,32 +24,26 @@ func readHierarchy(reader io.ReadCloser) []*sql.Hierarchy {
 
 // Reads from the reader into a StructuralData object and converts the result into a Hierarchy object
 func readData(reader io.ReadCloser) *StructuralData {
-	defer reader.Close()
-
-	body, err := ioutil.ReadAll(reader)
-	if err != nil {
-		fmt.Println("Error reading body!")
-		panic(err.Error())
-	}
-
 	var data *StructuralData
-	err = json.Unmarshal(body, &data)
+
+	parser.Parse(reader, &data)
+	if data == nil || data.Structure == nil || data.Structure.GetCodeLists() == nil {
+		panic(nilErrorMessage)
+	}
 	return data
 
 }
 
 func convertToHierarchy(data *StructuralData) []*sql.Hierarchy {
 
-	if data == nil || data.Structure == nil || data.Structure.CodeLists == nil {
-		panic(nilErrorMessage)
-	}
 	var hierarchies []*sql.Hierarchy
 
-	for i, codeList := range data.Structure.CodeLists.CodeList {
+	for _, codeList := range data.Structure.GetCodeLists() {
 		hierarchy := sql.NewHierarchy()
+		hierarchy.HierarchyType = "classification"
 		hierarchies = append(hierarchies, &hierarchy)
 
-		hierarchy.ID = codeList.ID + "_" + strconv.Itoa(i)
+		hierarchy.ID = codeList.ID
 		for _, name := range codeList.Names {
 			hierarchy.Names[name.Lang] = name.Name
 		}
@@ -61,6 +52,12 @@ func convertToHierarchy(data *StructuralData) []*sql.Hierarchy {
 			entry.Code = item.Value
 			entry.ParentCode = item.Parent
 			entry.Names[item.Description.Lang] = item.Description.Name
+			for _, a := range item.GetAnnotations() {
+				if a.AnnotationType == "DisplayOrder" {
+					i, _ := strconv.Atoi(a.AnnotationText.Name)
+					entry.DisplayOrder = i
+				}
+			}
 			hierarchy.Entries[entry.Code] = entry
 		}
 

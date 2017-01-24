@@ -22,6 +22,7 @@ func TestReadDataToHierarchy(t *testing.T) {
 
 			So(hierarchy, ShouldNotBeNil)
 			So(hierarchy.ID, ShouldEqual, "2011STATH")
+			So(hierarchy.HierarchyType, ShouldEqual, "geography")
 			So(hierarchy.Names["en"], ShouldEqual, "2011 Statistical Geography Hierarchy")
 			So(hierarchy.Names["cy"], ShouldEqual, "Hierarchaeth Daearyddiaeth Ystadegol 2011")
 			So(len(hierarchy.Entries), ShouldEqual, 5)
@@ -56,6 +57,22 @@ func TestReadEmptyDataToHierarchy(t *testing.T) {
 				r := recover()
 				So(r, ShouldNotBeNil)
 				So(r, ShouldEqual, nilErrorMessage)
+			}()
+			readHierarchy(readcloser)
+
+		})
+	})
+}
+
+func TestReadInvalidDataToHierarchy(t *testing.T) {
+
+	Convey("Given a reader containing invalid json", t, func() {
+		readcloser := ioutil.NopCloser(strings.NewReader(`{"ons":{"base":{"@href":"http://web.ons.gov.uk/ons/api/data/"},"node":{"urls":{"url":[{"@representation":"xml","href":"hierarchies/hierarchy/2011WKWZH.xml?apikey=Y6Xs59zXU0&levels=0,1,2"},]},"description":"","name":"Geography Classifications"},"linkedNodes":{"linkedNode":{`))
+
+		Convey("When read into a hierarchy", func() {
+			defer func() {
+				r := recover()
+				So(r, ShouldNotBeNil)
 			}()
 			readHierarchy(readcloser)
 
