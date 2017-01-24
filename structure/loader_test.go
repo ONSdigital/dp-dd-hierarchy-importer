@@ -66,7 +66,7 @@ func TestReadEmptyDataToHierarchy(t *testing.T) {
 func TestReadInvalidDataToHierarchy(t *testing.T) {
 
 	Convey("Given a reader containing invalid json", t, func() {
-		readcloser := ioutil.NopCloser(strings.NewReader("{\"Structure\":{\"Header\":{\"ID\":\"REGISTRY_RESPONSE\",\"Telephone\":\"0845 601 3034\"}},\"Extracted\":\"2017-01-23T09:23:37.245Z\"},\"CodeLists\":{\"CodeList\":{"))
+		readcloser := ioutil.NopCloser(strings.NewReader(`{"Structure":{"Header":{"ID":"REGISTRY_RESPONSE","Telephone":"0845 601 3034"}},"Extracted":"2017-01-23T09:23:37.245Z"},"CodeLists":{"CodeList":{`))
 
 		Convey("When read into a hierarchy", func() {
 			defer func() {

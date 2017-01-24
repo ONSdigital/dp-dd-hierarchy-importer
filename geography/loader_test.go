@@ -67,7 +67,7 @@ func TestReadEmptyDataToHierarchy(t *testing.T) {
 func TestReadInvalidDataToHierarchy(t *testing.T) {
 
 	Convey("Given a reader containing invalid json", t, func() {
-		readcloser := ioutil.NopCloser(strings.NewReader("{\"ons\":{\"base\":{\"@href\":\"http://web.ons.gov.uk/ons/api/data/\"},\"node\":{\"urls\":{\"url\":[{\"@representation\":\"xml\",\"href\":\"hierarchies/hierarchy/2011WKWZH.xml?apikey=Y6Xs59zXU0&levels=0,1,2\"},]},\"description\":\"\",\"name\":\"Geography Classifications\"},\"linkedNodes\":{\"linkedNode\":{"))
+		readcloser := ioutil.NopCloser(strings.NewReader(`{"ons":{"base":{"@href":"http://web.ons.gov.uk/ons/api/data/"},"node":{"urls":{"url":[{"@representation":"xml","href":"hierarchies/hierarchy/2011WKWZH.xml?apikey=Y6Xs59zXU0&levels=0,1,2"},]},"description":"","name":"Geography Classifications"},"linkedNodes":{"linkedNode":{`))
 
 		Convey("When read into a hierarchy", func() {
 			defer func() {
