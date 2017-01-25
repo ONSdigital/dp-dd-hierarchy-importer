@@ -26,6 +26,7 @@ var monthNames = map[int]string{
 	12: "December",
 }
 
+// CreateHierarchy creates a hierarchy for years, months and quarters for the given range of years
 func CreateHierarchy(start int, end int) *sql.Hierarchy {
 	h := sql.NewHierarchy()
 	h.Names[en] = "time"
