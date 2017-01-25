@@ -11,11 +11,14 @@ import (
 	"strconv"
 
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/geography"
+	"github.com/ONSdigital/dp-dd-hierarchy-importer/htime"
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/structure"
 )
 
-var hierarchyType = flag.String("type", "", "'g' (geographical hierarchy) or 's' (structural hierarchy)")
+var hierarchyType = flag.String("type", "", "'g' (geographical hierarchy), 's' (structural hierarchy), or 't' (time)")
+var start = flag.Int("start", 1900, "If type=t, the start year. Default 1900")
+var end = flag.Int("end", 2100, "If type=t, the end year. Default 2100")
 var printTree = flag.String("tree", "", "If specified, 'b' will write a tree showing the hierarchy excluding leaf nodes, l will include leaf nodes")
 
 func main() {
@@ -55,7 +58,9 @@ func main() {
 
 func checkCommandLineArgs() {
 	flag.Parse()
-	if len(flag.Args()) != 1 || (*hierarchyType != "g" && *hierarchyType != "s") {
+	validJson := len(flag.Args()) == 1 && (*hierarchyType == "g" || *hierarchyType == "s")
+	validTime := len(flag.Args()) == 0 && *hierarchyType == "t"
+	if !validJson && !validTime {
 		_, exe := filepath.Split(os.Args[0])
 		fmt.Println("ONS hierarchy importer. Reads a json representation of a hierarchy or classification, and creates a set of sql insert statements to reconstruct a hierarchy in the db")
 		fmt.Println("Please specify a type argument of 'g' (geographical hierarchy) or 's' (structural hierarchy/classification), and the location of the file to parse, e.g.")
@@ -64,6 +69,8 @@ func checkCommandLineArgs() {
 		fmt.Println(exe + " -type=s 'http://web.ons.gov.uk/ons/api/data/classification/CL_0000641.json?apikey=XXXXX&context=Economic'")
 		fmt.Println("or")
 		fmt.Println(exe + " -type=g /tmp/localfile.json")
+		fmt.Println("Or a type of 't' and a start and end year. Creates a time hierarchy where each year contains months and quarters")
+		fmt.Println(exe + " -type=t -start=1900 -end=2100")
 		fmt.Println("There is also a 'tree=b or -tree=l option, which will write a tree depiction of the hierarchy excluding leaves (b) or including them (l)")
 		os.Exit(0)
 	}
@@ -71,12 +78,15 @@ func checkCommandLineArgs() {
 
 func loadHierarchies(t string, file string) []*sql.Hierarchy {
 	var hierarchies []*sql.Hierarchy
-	fmt.Printf("Importing hierarchies from %s\n", file)
 	switch t {
 	case "g":
+		fmt.Printf("Importing hierarchies from %s\n", file)
 		hierarchies = append(hierarchies, geography.LoadGeography(file))
 	case "s":
+		fmt.Printf("Importing hierarchies from %s\n", file)
 		hierarchies = append(hierarchies, structure.LoadStructure(file)...)
+	case "t":
+		hierarchies = append(hierarchies, htime.CreateHierarchy(*start, *end))
 	}
 	return hierarchies
 }
@@ -84,7 +94,7 @@ func loadHierarchies(t string, file string) []*sql.Hierarchy {
 func writeSQLForHierarchy(filePrefix string, h *sql.Hierarchy) {
 	depth := h.Depth()
 	if depth < 3 {
-		fmt.Printf("Hierarchy %s is only has a depth of %d - are you sure this qualifies as a hierarchy?\n", h.ID, depth)
+		fmt.Printf("Hierarchy %s has a maximum depth of %d\n", h.ID, depth)
 	}
 	filename := filePrefix + ".sql"
 	fmt.Printf("Creating sql file %s\n", filename)
