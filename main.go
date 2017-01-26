@@ -58,9 +58,9 @@ func main() {
 
 func checkCommandLineArgs() {
 	flag.Parse()
-	validJson := len(flag.Args()) == 1 && (*hierarchyType == "g" || *hierarchyType == "s")
+	validJSON := len(flag.Args()) == 1 && (*hierarchyType == "g" || *hierarchyType == "s")
 	validTime := len(flag.Args()) == 0 && *hierarchyType == "t"
-	if !validJson && !validTime {
+	if !validJSON && !validTime {
 		_, exe := filepath.Split(os.Args[0])
 		fmt.Println("ONS hierarchy importer. Reads a json representation of a hierarchy or classification, and creates a set of sql insert statements to reconstruct a hierarchy in the db")
 		fmt.Println("Please specify a type argument of 'g' (geographical hierarchy) or 's' (structural hierarchy/classification), and the location of the file to parse, e.g.")
