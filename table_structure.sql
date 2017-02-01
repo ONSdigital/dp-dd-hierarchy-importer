@@ -6,6 +6,12 @@ CREATE TABLE "hierarchy"
   type varchar
 );
 
+CREATE TABLE "hierarchy_level_type"
+(
+  id varchar PRIMARY KEY NOT NULL,
+  level int,
+  name varchar
+);
 
 CREATE TABLE "hierarchy_entry"
 (
@@ -27,11 +33,4 @@ CREATE UNIQUE INDEX unq_hierarchy_entry_0 ON "hierarchy_entry"
   code
 );
 
-
-CREATE TABLE "hierarchy_level_type"
-(
-  id varchar PRIMARY KEY NOT NULL,
-  level int,
-  name varchar
-);
 
