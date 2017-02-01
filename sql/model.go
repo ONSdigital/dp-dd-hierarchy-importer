@@ -1,5 +1,7 @@
 package sql
 
+import "github.com/satori/go.uuid"
+
 // Hierarchy represents a complete hierarchy
 type Hierarchy struct {
 	ID            string
@@ -32,11 +34,13 @@ type Entry struct {
 	AreaType     string
 	Names        map[string]string
 	DisplayOrder int
+	UUID         string
 }
 
 // NewEntry returns a properly initialised Entry
 func NewEntry() Entry {
 	entry := Entry{}
 	entry.Names = make(map[string]string)
+	entry.UUID = uuid.NewV4().String()
 	return entry
 }
