@@ -1,26 +1,37 @@
-CREATE TABLE hierarchy (
-  hierarchy_id VARCHAR NOT NULL,
-  hierarchy_name VARCHAR,
-  hierarchy_type VARCHAR,
-  PRIMARY KEY( hierarchy_id )
+
+CREATE TABLE "hierarchy"
+(
+  id varchar PRIMARY KEY NOT NULL,
+  name varchar,
+  type varchar
 );
 
-CREATE TABLE hierarchy_level_type (
-  type_id VARCHAR NOT NULL,
-  type_name VARCHAR,
-  type_level INTEGER,
-  PRIMARY KEY( type_id )
+
+CREATE TABLE "hierarchy_entry"
+(
+  id varchar PRIMARY KEY NOT NULL,
+  code varchar NOT NULL,
+  display_order int,
+  name varchar,
+  hierarchy_id varchar NOT NULL,
+  hierarchy_level_type_id varchar,
+  parent varchar,
+  FOREIGN KEY (parent) REFERENCES "hierarchy_entry"(id),
+  FOREIGN KEY (hierarchy_id) REFERENCES "hierarchy"(id),
+  FOREIGN KEY (hierarchy_level_type_id) REFERENCES "hierarchy_level_type"(id)
 );
 
-CREATE TABLE hierarchy_entry (
-  hierarchy_id VARCHAR NOT NULL,
-  value_code VARCHAR NOT NULL,
-  parent_code VARCHAR,
-  value_name VARCHAR,
-  level_type VARCHAR,
-  display_order INTEGER,
-  PRIMARY KEY( hierarchy_id, value_code ),
-  FOREIGN KEY (hierarchy_id) REFERENCES hierarchy (hierarchy_id),
-  FOREIGN KEY (level_type) REFERENCES hierarchy_level_type (type_id),
-  FOREIGN KEY (hierarchy_id, parent_code) REFERENCES hierarchy_entry (hierarchy_id, value_code)
+CREATE UNIQUE INDEX unq_hierarchy_entry_0 ON "hierarchy_entry"
+(
+  hierarchy_id,
+  code
 );
+
+
+CREATE TABLE "hierarchy_level_type"
+(
+  id varchar PRIMARY KEY NOT NULL,
+  level int,
+  name varchar
+);
+

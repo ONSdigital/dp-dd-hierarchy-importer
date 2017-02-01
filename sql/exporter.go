@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	hierarchySQL = "insert into hierarchy (hierarchy_id, hierarchy_name, hierarchy_type) values (%s, %s, %s);\n"
-	areaSQL      = "insert into hierarchy_level_type (type_id, type_name, type_level) values (%s, %s, %d) on conflict do nothing;\n"
-	entrySQL     = "insert into hierarchy_entry (hierarchy_id, value_code, parent_code, value_name, level_type, display_order) values (%s, %s, %s, %s, %s, %d);\n"
+	hierarchySQL = "insert into hierarchy (id, name, type) values (%s, %s, %s);\n"
+	areaSQL      = "insert into hierarchy_level_type (id, name, level) values (%s, %s, %d) on conflict do nothing;\n"
+	entrySQL     = "insert into hierarchy_entry (id, hierarchy_id, code, parent, name, hierarchy_level_type_id, display_order) values (%s, %s, %s, %s, %s, %s, %d);\n"
 )
 
 // WriteSQL writes sql insert statements to the given writer to create the given hierarchy in a db.
@@ -87,14 +87,16 @@ func writeEntry(writer io.Writer, entry *Entry, hierarchyID string, entries map[
 	if written[entry.Code] == true {
 		return
 	}
+	var parentId string
 	if len(entry.ParentCode) > 0 {
 		if parent, ok := entries[entry.ParentCode]; ok {
 			writeEntry(writer, &parent, hierarchyID, entries, written)
+			parentId = parent.UUID
 		} else {
 			fmt.Printf("!! Entry '%s' has an unknown parent '%s' - the hierarchy is incomplete and some insert statements will fail\n", entry.Code, entry.ParentCode)
 		}
 	}
-	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(hierarchyID), quote(entry.Code), quote(entry.ParentCode), quote(entry.Names["en"]), quote(entry.AreaType), entry.DisplayOrder))
+	io.WriteString(writer, fmt.Sprintf(entrySQL, quote(entry.UUID), quote(hierarchyID), quote(entry.Code), quote(parentId), quote(entry.Names["en"]), quote(entry.AreaType), entry.DisplayOrder))
 	written[entry.Code] = true
 }
 

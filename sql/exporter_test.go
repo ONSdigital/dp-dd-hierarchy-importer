@@ -8,6 +8,7 @@ import (
 
 	"strconv"
 
+	"github.com/satori/go.uuid"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -15,10 +16,10 @@ var sampleHierarchy = Hierarchy{
 	ID:    "myHierarchyId",
 	Names: map[string]string{"en": "my hierarchy name"},
 	Entries: map[string]Entry{
-		"c":      {Code: "c", AreaType: "C", ParentCode: "b", Names: map[string]string{"en": "level c name", "cy": "welsh name"}},
-		"b":      {Code: "b", AreaType: "B", ParentCode: "a", Names: map[string]string{"en": "level b name", "cy": "welsh name"}},
-		"a":      {Code: "a", AreaType: "A", ParentCode: "", Names: map[string]string{"en": "level a name", "cy": "welsh name"}},
-		"orphan": {Code: "orphan", AreaType: "C", ParentCode: "x", Names: map[string]string{"en": "orphan 'name'", "cy": "welsh name"}},
+		"c":      {UUID: uuid.NewV4().String(), Code: "c", AreaType: "C", ParentCode: "b", Names: map[string]string{"en": "level c name", "cy": "welsh name"}},
+		"b":      {UUID: uuid.NewV4().String(), Code: "b", AreaType: "B", ParentCode: "a", Names: map[string]string{"en": "level b name", "cy": "welsh name"}},
+		"a":      {UUID: uuid.NewV4().String(), Code: "a", AreaType: "A", ParentCode: "", Names: map[string]string{"en": "level a name", "cy": "welsh name"}},
+		"orphan": {UUID: uuid.NewV4().String(), Code: "orphan", AreaType: "C", ParentCode: "x", Names: map[string]string{"en": "orphan 'name'", "cy": "welsh name"}},
 	},
 	AreaTypes: map[string]LevelType{
 		"A": {ID: "A", Level: 1, Name: "Level 1 -A"},
@@ -75,11 +76,12 @@ func TestWriteInserts(t *testing.T) {
 				idx++
 				entry := sampleHierarchy.Entries[e]
 				So(line, ShouldStartWith, "insert into hierarchy_entry ")
+				So(line, ShouldContainSubstring, "'"+entry.UUID+"'")
 				So(line, ShouldContainSubstring, "'"+entry.Code+"'")
 				if len(entry.ParentCode) == 0 {
 					So(line, ShouldContainSubstring, "null")
 				} else {
-					So(line, ShouldContainSubstring, "'"+entry.ParentCode+"'")
+					So(line, ShouldContainSubstring, "'"+sampleHierarchy.Entries[entry.ParentCode].UUID+"'")
 				}
 			}
 
