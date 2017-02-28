@@ -35,13 +35,12 @@ func ParseHierarchiesFromCSV(filename string) (map[string]map[string]bool, map[i
 
 	reader.Read()
 
-csvLoop:
 	for {
 		row, err := reader.Read()
 		if err != nil {
 			if err == io.EOF {
 				fmt.Println("EOF reached, no more records to process", err.Error())
-				break csvLoop
+				break
 			} else {
 				fmt.Println("Error occurred and cannot process anymore entry", err.Error())
 				panic(err)
@@ -87,11 +86,10 @@ func FindAllHierarchies(filename string, apikey string) {
 				fmt.Println(fmt.Sprintf("hierarchy %s in context %s contains %d hierarchies", hierarchyId, context, len(hierarchies)))
 				for i, h := range hierarchies {
 					containsAll := true
-				inCSVLoop:
 					for required := range hierarchiesInCsv[hierarchyId] {
 						if _, exists := h.Entries[required]; !exists {
 							containsAll = false
-							break inCSVLoop
+							break
 						}
 					}
 					if containsAll {
@@ -109,11 +107,10 @@ func FindAllHierarchies(filename string, apikey string) {
 				fmt.Println(fmt.Sprintf("Geographic hierarchy %s contains %d hierarchies", hierarchyId, len(hierarchies)))
 				for i, h := range hierarchies {
 					containsAll := true
-				inCSVLoop2:
 					for required := range hierarchiesInCsv[hierarchyId] {
 						if _, exists := h.Entries[required]; !exists {
 							containsAll = false
-							break inCSVLoop2
+							break
 						}
 					}
 					if containsAll {
@@ -129,7 +126,7 @@ func FindAllHierarchies(filename string, apikey string) {
 	for idx, hierarchies := range hierarchiesInDimensions {
 		fmt.Print(fmt.Sprintf("Dimension %d contains %d hierarchies: ", idx, len(hierarchies)))
 		for hierarchyId := range hierarchies {
-			fmt.Print(fmt.Sprintf("%s: (%d matched values) ", hierarchyId, len(hierarchiesInCsv[hierarchyId])))
+			fmt.Printf("%s: (%d matched values) ", hierarchyId, len(hierarchiesInCsv[hierarchyId]))
 		}
 		fmt.Println()
 	}
