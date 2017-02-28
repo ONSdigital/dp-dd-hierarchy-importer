@@ -10,6 +10,7 @@ import (
 
 	"strconv"
 
+	"github.com/ONSdigital/dp-dd-hierarchy-importer/csvparser"
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/geography"
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/htime"
 	"github.com/ONSdigital/dp-dd-hierarchy-importer/sql"
@@ -20,6 +21,8 @@ var hierarchyType = flag.String("type", "", "'g' (geographical hierarchy), 's' (
 var start = flag.Int("start", 1900, "If type=t, the start year. Default 1900")
 var end = flag.Int("end", 2100, "If type=t, the end year. Default 2100")
 var printTree = flag.String("tree", "", "If specified, 'b' will write a tree showing the hierarchy excluding leaf nodes, l will include leaf nodes")
+var csvFile = flag.String("csvFile", "", "The name of a csv file to find hierarchies for")
+var apiKey = flag.String("apiKey", "", "The api key ")
 
 func main() {
 	defer func() {
@@ -32,6 +35,11 @@ func main() {
 	fmt.Println()
 	checkCommandLineArgs()
 	dir := getWorkingDir()
+
+	if len(*csvFile) > 0 {
+		csvparser.FindAllHierarchies(*csvFile, *apiKey)
+		os.Exit(0)
+	}
 
 	hierarchies := loadHierarchies(*hierarchyType, flag.Arg(0))
 
@@ -60,7 +68,8 @@ func checkCommandLineArgs() {
 	flag.Parse()
 	validJSON := len(flag.Args()) == 1 && (*hierarchyType == "g" || *hierarchyType == "s")
 	validTime := len(flag.Args()) == 0 && *hierarchyType == "t"
-	if !validJSON && !validTime {
+	validCsv := len(*csvFile) > 0 && len(*apiKey) > 0
+	if !validJSON && !validTime && !validCsv {
 		_, exe := filepath.Split(os.Args[0])
 		fmt.Println("ONS hierarchy importer. Reads a json representation of a hierarchy or classification, and creates a set of sql insert statements to reconstruct a hierarchy in the db")
 		fmt.Println("Please specify a type argument of 'g' (geographical hierarchy) or 's' (structural hierarchy/classification), and the location of the file to parse, e.g.")
@@ -72,6 +81,11 @@ func checkCommandLineArgs() {
 		fmt.Println("Or a type of 't' and a start and end year. Creates a time hierarchy where each year contains months and quarters")
 		fmt.Println(exe + " -type=t -start=1900 -end=2100")
 		fmt.Println("There is also a 'tree=b or -tree=l option, which will write a tree depiction of the hierarchy excluding leaves (b) or including them (l)")
+		fmt.Println()
+		fmt.Println("Alternatively, provide two arguments:")
+		fmt.Println("  -csvFile=/path/to/file.csv")
+		fmt.Println("  -apiKey=yourApiKey")
+		fmt.Println("This wil analyse a csv file, retrieve all hierarchies associated with the file and output some information about the dimensions")
 		os.Exit(0)
 	}
 }
