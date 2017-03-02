@@ -47,7 +47,7 @@ func convertToHierarchy(data *GeographicData) *sql.Hierarchy {
 			key := item.AreaType.Abbreviation
 			if area, exists := hierarchy.AreaTypes[key]; exists {
 				if area.Name != item.AreaType.Codename {
-					fmt.Println("WARNING: AreaType %s is defined multiple times with different names - '%s', '$s'", key, area.Name, item.AreaType.Codename)
+					fmt.Printf("WARNING: AreaType %s is defined multiple times with different names - '%s', '%s'\n", key, area.Name, item.AreaType.Codename)
 				}
 			} else {
 				hierarchy.AreaTypes[key] = sql.LevelType{ID: key, Name: item.AreaType.Codename, Level: int(item.AreaType.Level)}
