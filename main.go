@@ -134,6 +134,14 @@ func writeTreeForHierarchy(filePrefix string, h *sql.Hierarchy) {
 	}
 	includeEmpty := *printTree == "l"
 	sql.WriteTree(file, h, includeEmpty)
+	filename = filePrefix + "_arealist.txt"
+	fmt.Printf("Creating area list %s\n", filename)
+	file, err = os.Create(filename)
+	defer file.Close()
+	if err != nil {
+		log.Fatal("Cannot create file", err)
+	}
+	sql.WriteLists(file, h)
 }
 
 func getWorkingDir() string {
