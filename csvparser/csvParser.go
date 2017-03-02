@@ -133,7 +133,7 @@ func FindAllHierarchies(filename string, apikey string) {
 	fmt.Println()
 	for hierarchyId := range hierarchiesInCsv {
 		if _, exists := found[hierarchyId]; !exists {
-			fmt.Println(fmt.Sprintf("Unable to find hierarchy matching all entries for %s: %v", hierarchyId, hierarchiesInCsv[hierarchyId]))
+			fmt.Println(fmt.Sprintf("Unable to find hierarchy matching all entries for %s: %v", hierarchyId, describeHierarchyEntries(hierarchiesInCsv[hierarchyId])))
 		}
 	}
 }
@@ -178,4 +178,15 @@ func writeSQLForHierarchy(filePrefix string, h *sql.Hierarchy) {
 	}
 	sql.WriteSQL(file, h)
 	fmt.Printf("Finished writing %s with %d entries\n", filename, len(h.Entries))
+}
+
+func describeHierarchyEntries(entries map[string]bool) string {
+	if len(entries)>100 {
+		return fmt.Sprintf("containing %d entries", len(entries))
+	}
+	var list []string
+	for entry,_ := range entries {
+		list = append(list, entry)
+	}
+	return fmt.Sprintf("%v", entries)
 }

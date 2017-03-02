@@ -33,7 +33,6 @@ type Item struct {
 	ItemCode          string    `json:"itemCode"`
 	ParentCode        string    `json:"parentCode,omitempty"`
 	AreaType          *AreaType `json:"areaType"`
-	SubthresholdAreas string    `json:"subthresholdAreas"`
 }
 
 // AreaType is reference data for area types - country, region, etc
